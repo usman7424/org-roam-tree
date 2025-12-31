@@ -33,17 +33,24 @@
           ;; File-level section (collapsible)
           (magit-insert-section (org-roam-tree-file file)
             (let ((prefix (org-roam-tree-make-prefix 1 t nil)))
-              (magit-insert-heading (concat prefix (file-name-nondirectory file)))
+              (magit-insert-heading (concat prefix (file-name-nondirectory file))))
             
             ;; Iterate over nodes in this file
-            (dolist (n nodes)
-              (org-roam-node-insert-section
-               :source-node n
-               :point (org-roam-node-point n)
-               :properties nil))) ;; or copy properties as needed
-          ;; Optional newline between files
-          (insert ?\n)))))))
 
+            (let ((node-count (length nodes)))
+              (cl-loop for n in nodes
+                       for node-index from 1
+                       for is-last-node = (= node-index node-count) do
+                       (let ((start (point))
+                             (prefix (org-roam-tree-make-prefix 2 t is-last-node)))
+                         (org-roam-node-insert-section
+                          :source-node n
+                          :point (org-roam-node-point n)
+                          :properties nil)
+                         ;; prepend prefix to first line
+                         (save-excursion
+                           (goto-char start)
+                           (insert prefix)))))))))))
 
 (defun org-roam-tree-make-prefix (depth is-node is-last)
   "Generate a tree-style prefix string for a line.
