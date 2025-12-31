@@ -32,9 +32,8 @@
               (nodes (cdr file-entry)))
           ;; File-level section (collapsible)
           (magit-insert-section (org-roam-tree-file file)
-            (magit-insert-heading (file-name-nondirectory file))
-            
-            ;; Optional: add indentation / vertical guide here
+            (let ((prefix (org-roam-tree-make-prefix 1 t nil)))
+              (magit-insert-heading (concat prefix (file-name-nondirectory file)))
             
             ;; Iterate over nodes in this file
             (dolist (n nodes)
@@ -43,7 +42,28 @@
                :point (org-roam-node-point n)
                :properties nil))) ;; or copy properties as needed
           ;; Optional newline between files
-          (insert ?\n))))))
+          (insert ?\n)))))))
+
+
+(defun org-roam-tree-make-prefix (depth is-node is-last)
+  "Generate a tree-style prefix string for a line.
+
+DEPTH is the nesting level (1 = file).  
+IS-NODE is t if this is a child node.  
+IS-LAST is t if this is the last sibling."
+  (let ((prefix ""))
+    ;; repeat vertical line + space for each ancestor level
+    (when (> depth 1)
+      (setq prefix (mapconcat (lambda (_) "│ ")
+                               (make-list (1- depth) nil)
+                               "")))
+    ;; add branch for current item
+    (setq prefix (concat prefix
+                         (cond
+                          (is-last "└─ ")
+                          (is-node "├─ ")
+                          (t "│"))))
+    prefix))
 
 
 (defun org-roam-tree-backlinks (&optional node)
