@@ -25,43 +25,62 @@
     (magit-insert-section (org-roam-tree-backlinks)
       ;; Top-level heading
       (magit-insert-heading section-heading)
-      
-      ;; Iterate over files
-      (dolist (file-entry tree)
-        (let ((file (car file-entry))
-              (nodes (cdr file-entry)))
-          ;; File-level section (collapsible)
-          (magit-insert-section (org-roam-tree-file file)
-            (let ((prefix (org-roam-tree-make-prefix 1 t nil)))
-              (magit-insert-heading (concat prefix (file-name-nondirectory file) (format " (%d)" (length nodes)) )))
-            
-            ;; Iterate over nodes in this file
+      ;; Ugly hack: inserting text prefixes in the buffer leads to a race condition
+      ;; with visual-line-mode reflowing the buffer, making some lines overflow, so
+      ;; we temporarily set a right margin of 6 chars to leave space for the prefixes.
+      ;; TODO : for future iterations with greater depth trees, calculate the
+      ;; margin width.
+      (let ((old-margin (window-margins)))  ; save existing margins
+        (unwind-protect
+            (progn
+              ;; Set temporary right margin to 6 columns
+              (set-window-margins (selected-window) (car old-margin) (+ (or (cdr old-margin) 0) 6))
+              ;; Iterate over files
+              (dolist (file-entry tree)
+                (let ((file (car file-entry))
+                      (nodes (cdr file-entry)))
+                  ;; File-level section (collapsible)
+                  (magit-insert-section (org-roam-tree-file file)
+                    (let ((prefix (org-roam-tree-make-prefix 1 t nil)))
+                      (magit-insert-heading (concat prefix (file-name-nondirectory file) (format " (%d)" (length nodes)) )))
+                    
+                    ;; Iterate over nodes in this file
 
-            (let ((node-count (length nodes)))
-              (cl-loop for n in nodes
-                       for node-index from 1
-                       for is-last-node = (= node-index node-count) do
-                       (let ((start (point))
-                             (prefix (org-roam-tree-make-prefix 2 t is-last-node)))
-                         (org-roam-node-insert-section
-                          :source-node (org-roam-backlink-source-node n)
-                          :point (org-roam-backlink-point n)
-                          :properties (org-roam-backlink-properties n))
-                         
-                         ;; prepend prefixes
-                         (save-excursion
-                           (goto-char start)
-                           ;; First visual line gets the branch prefix
-                           (insert (org-roam-tree-make-prefix 2 t is-last-node))
-                           ;; Move down visual lines for wrapped content
-                           (while (line-move-visual 1 t) ;; move 1 visual line, no error
-                             (unless (= (point) (point-max))
-                             (beginning-of-visual-line)
-                             ( if (and is-last-node (looking-at-p "^\\s-*$")) ; empty lines are between nodes
-                             (insert (org-roam-tree-make-prefix 1 nil nil))
-                             (insert (org-roam-tree-make-prefix 2 nil is-last-node))))
-                           ))
-                         )))))))))
+                    (let ((node-count (length nodes)))
+                      (cl-loop for n in nodes
+                               for node-index from 1
+                               for is-last-node = (= node-index node-count) do
+                               (let ((start (point))
+                                     (prefix (org-roam-tree-make-prefix 2 t is-last-node)))
+                                 (org-roam-node-insert-section
+                                  :source-node (org-roam-backlink-source-node n)
+                                  :point (org-roam-backlink-point n)
+                                  :properties (org-roam-backlink-properties n))
+                                 
+                                 ;; prepend prefix to first line
+                                 (save-excursion
+                                   (goto-char start)
+                                   ;; First visual line gets the branch prefix
+                                   (insert (org-roam-tree-make-prefix 2 t is-last-node))
+                                   ;; Move down visual lines for wrapped content
+                                   (while (line-move-visual 1 t) ;; move 1 visual line, no error
+                                     (unless (= (point) (point-max))
+
+                                       (beginning-of-visual-line)
+                                       (save-excursion ; there's a \n between node heading and body; delete it to
+                                        ; avoid blank lines
+                                         (backward-char)
+                                         (when (eq (char-after) ?\n)
+                                           (delete-char 1)))
+                                       ( if (and is-last-node (looking-at-p "^\\s-*$")) ; empty lines are between nodes
+                                           (insert (concat "" (org-roam-tree-make-prefix 1 nil nil)))
+                                         (insert (concat "\n" (org-roam-tree-make-prefix 2 nil is-last-node)))))
+                                     ))
+                                 )))))))
+          (set-window-margins (selected-window)
+                              (car old-margin)
+                              (cdr old-margin))))
+      )))
 
 (defun org-roam-tree-make-prefix (depth is-node is-last)
   "Generate a tree-style prefix string for a line.
