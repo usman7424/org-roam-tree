@@ -44,10 +44,11 @@
                        (let ((start (point))
                              (prefix (org-roam-tree-make-prefix 2 t is-last-node)))
                          (org-roam-node-insert-section
-                          :source-node n
-                          :point (org-roam-node-point n)
-                          :properties nil)
-                         ;; prepend prefix to first line
+                          :source-node (org-roam-backlink-source-node n)
+                          :point (org-roam-backlink-point n)
+                          :properties (org-roam-backlink-properties n))
+                         
+                         ;; prepend prefixes
                          (save-excursion
                            (goto-char start)
                            ;; First visual line gets the branch prefix
@@ -88,7 +89,7 @@ IS-LAST is t if this is the last sibling."
   "Return backlinks of NODE grouped by source file.
 
 Return value:
-  ((FILE . (NODE NODE ...)) ...)
+  ((FILE . (BACKLINK BACKLINK ...)) ...)
 
 NODE defaults to `org-roam-node-at-point` if nil."
   (require 'org-roam)
@@ -100,12 +101,12 @@ NODE defaults to `org-roam-node-at-point` if nil."
              (file (org-roam-node-file src)))
         (when src
           (puthash file
-                   (cons src (gethash file table))
+                   (cons bl (gethash file table))
                    table))))
     (let (result)
       (maphash
-       (lambda (file nodes)
-         (push (cons file (nreverse nodes)) result))
+       (lambda (file backlinks)
+         (push (cons file (nreverse backlinks)) result))
        table)
       result)))
 
