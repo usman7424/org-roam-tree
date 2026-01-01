@@ -53,10 +53,11 @@
      ;; Iterate over files
      (dolist (file-entry tree)
        (let ((file (car file-entry))
-             (nodes (cdr file-entry)))
+             (nodes (cdr file-entry))i
+             (is-last-file (eq file-entry (car (last tree)))))
          ;; File-level section (collapsible)
          (magit-insert-section (org-roam-tree-file file)
-           (let ((prefix (org-roam-tree-make-prefix 1 t nil)))
+           (let ((prefix (org-roam-tree-make-prefix 1 t is-last-file)))
              (magit-insert-heading (concat prefix (file-name-nondirectory file) (format " (%d)" (length nodes)) )))
            
            ;; Iterate over nodes in this file
@@ -65,8 +66,7 @@
              (cl-loop for n in nodes
                       for node-index from 1
                       for is-last-node = (= node-index node-count) do
-                      (let ((start (point))
-                            (prefix (org-roam-tree-make-prefix 2 t is-last-node)))
+                      (let ((start (point)))
                         (org-roam-node-insert-section
                          :source-node (org-roam-backlink-source-node n)
                          :point (org-roam-backlink-point n)
@@ -75,7 +75,7 @@
                         ;; prepend prefix to first line
                         (save-excursion
                           (goto-char start)
-                          (org-roam-tree--prefix-node-content (list nil is-last-node))
+                          (org-roam-tree--prefix-node-content (list is-last-file is-last-node))
                           )))))))))
  (when org-roam-tree-collapse-after-init
    (org-roam-tree-collapse-all-files)
