@@ -16,3 +16,16 @@ Creates a tree-like backlinks list you can add to your org-roam buffer, which or
  
 
 *THIS HAS ROUGH EDGES*, it's functional, but a work in progress.
+* Usage
+
+#+begin_src elisp
+
+;; Enable by adding org-roam-tree-backlinks-section to org-roam-mode-sections
+;; 
+;; Show only this section in the org-roam buffer:
+(setq! org-roam-mode-sections '(org-roam-tree-backlinks-section))
+;;
+;; Add this section with the others in the org-roam buffer:
+(add-to-list 'org-roam-mode-sections
+             #'org-roam-tree-backlinks-section t)
+#+end_src
