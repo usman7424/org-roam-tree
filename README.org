@@ -31,4 +31,4 @@ You can customize =org-roam-tree-collapse-after-init= to enable/disable auto-col
 
 ** [ ] remember & restore collapsed states
 ** [X] remove vertical bar  on final file
-** [ ] fix wrapping next header when collapsing a note
+** [X] fix wrapping next header when collapsing a note

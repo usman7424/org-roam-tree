@@ -69,9 +69,8 @@ backlinks are org-roam backlink objects"
          (magit-insert-section (org-roam-tree-file file)
            (let ((prefix (org-roam-tree-make-prefix 1 t is-last-file)))
              (magit-insert-heading (concat prefix (file-name-nondirectory file) (format " (%d)" (length nodes)) )))
-           
-           ;; Iterate over nodes in this file
 
+           ;; Iterate over nodes in this file
            (let ((node-count (length nodes)))
              (cl-loop for n in nodes
                       for node-index from 1
@@ -82,15 +81,15 @@ backlinks are org-roam backlink objects"
                          :point (org-roam-backlink-point n)
                          :properties (org-roam-backlink-properties n))
                         
+                        (insert " \n") ; hack to fix wrap on section collapse.
+
                         ;; prepend prefix to first line
                         (save-excursion
                           (goto-char start)
-                          (org-roam-tree--prefix-node-content (list is-last-file is-last-node))
-                          )))))))))
+                          (org-roam-tree--prefix-node-content (list is-last-file is-last-node)))))))))))
  (when org-roam-tree-collapse-after-init
    (org-roam-tree-collapse-all-files)
-   (goto-char (point-min))
-   )))
+   (goto-char (point-min)))))
 
 (defmacro with-org-roam-tree-layout (&rest body)
   "Ensure proper visual layout for Org-roam tree rendering.
