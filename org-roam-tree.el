@@ -30,6 +30,7 @@
 ;; 
 ;; Show only this section in the org-roam buffer:
 ;;(setq! org-roam-mode-sections '(org-roam-tree-backlinks-section))
+;;(setq! org-roam-mode-sections '(org-roam-tree-reflinks-section))
 ;;(setq! org-roam-mode-sections '(org-roam-tree-reflinks-section org-roam-tree-backlinks-section))
 ;;
 ;; Add this section with the others in the org-roam buffer:
@@ -47,24 +48,44 @@
   :type 'boolean
   :group 'org-roam-tree)
 
+
+(defvar org-roam-tree-fold-state (make-hash-table :test 'equal)
+  "Stores fold states for files per node.")
+
+(defun org-roam-tree--file-fold-state (node file)
+  "Return t if FILE under NODE should be folded."
+  (gethash (cons node file) org-roam-tree-fold-state)
+      )
+
+(defun org-roam-tree--set-file-fold-state (node file hidden)
+  "Store fold state for FILE under NODE."
+  (puthash (cons node file) hidden org-roam-tree-fold-state))
+
+
 (cl-defun org-roam-tree-backlinks-section (node &key (section-heading "Backlinks Tree:"))
   "A tree-style backlinks section for NODE, grouping by source file."
-  (org-roam-tree-section node :section-heading section-heading :data-getter #'org-roam-tree-backlinks))
-
+  (org-roam-tree-section node :section-heading section-heading :data-getter #'org-roam-tree-backlinks :section-id 'backlinks-tree))
 
 (cl-defun org-roam-tree-reflinks-section (node &key (section-heading "Reflinks Tree:"))
   "A tree-style backlinks section for NODE, grouping by source file."
-  (org-roam-tree-section node :section-heading section-heading :data-getter #'org-roam-tree-reflinks))
+  (org-roam-tree-section node :section-heading section-heading :data-getter #'org-roam-tree-reflinks :section-id 'reflinks-tree))
 
-(cl-defun org-roam-tree-section (node &key (section-heading "Tree Section:") (data-getter #'org-roam-tree-backlinks))
+
+
+
+
+
+(cl-defun org-roam-tree-section (node &key (section-heading "Tree Section:") (data-getter #'org-roam-tree-backlinks) (section-id 'org-roam-tree-section))
   "Generalized logic for a tree in the org-roam buffer. Can 
 DATA-GETTER is a function that returns a tree in the format:
 ((parent . (backlink backlink ...)) ...) where parent is a string and
-backlinks are org-roam backlink objects"
+backlinks are org-roam backlink objects.
+SECTION-ID is a symbol to tag this tree's section in the backlinks
+buffer."
 
 (with-org-roam-tree-layout
  (when-let ((tree (funcall data-getter node)))
-   (magit-insert-section (org-roam-tree-backlinks)
+   (magit-insert-section  section-id
      ;; Top-level heading
      (magit-insert-heading section-heading)
      ;; Iterate over files
@@ -73,7 +94,10 @@ backlinks are org-roam backlink objects"
              (nodes (cdr file-entry))i
              (is-last-file (eq file-entry (car (last tree)))))
          ;; File-level section (collapsible)
-         (magit-insert-section (org-roam-tree-file file)
+(magit-insert-section
+ (intern (concat "org-roam-tree-file-" (file-name-nondirectory file)))
+ :hide org-roam-tree-collapse-after-init
+
            (let ((prefix (org-roam-tree-make-prefix 1 t is-last-file)))
              (magit-insert-heading (concat prefix (file-name-nondirectory file) (format " (%d)" (length nodes)) )))
 
@@ -102,10 +126,14 @@ backlinks are org-roam backlink objects"
                         ;; prepend prefix to first line
                         (save-excursion
                           (goto-char start)
-                          (org-roam-tree--prefix-node-content (list is-last-file is-last-node)))))))))))
- (when org-roam-tree-collapse-after-init
-   (org-roam-tree-collapse-all-files)
-   (goto-char (point-min)))))
+                          (org-roam-tree--prefix-node-content (list is-last-file is-last-node))
+                          )))))
+
+                          (if (org-roam-tree--file-fold-state (org-roam-node-id node) (file-name-nondirectory file))
+                            (save-excursion
+                              (forward-line -1)
+                            (magit-section-hide (magit-current-section))
+                            ))))))))
 
 (defmacro with-org-roam-tree-layout (&rest body)
   "Ensure proper visual layout for Org-roam tree rendering.
@@ -117,6 +145,7 @@ backlinks are org-roam backlink objects"
 
 BODY is the code that renders the tree content."
   `(with-selected-window (get-buffer-window org-roam-buffer)
+     (save-excursion
      (let ((old-margin (window-margins)))  ; save existing margins
        (unwind-protect
            (progn
@@ -130,7 +159,17 @@ BODY is the code that renders the tree content."
          ;; Restore original margins
          (set-window-margins (selected-window)
                              (car old-margin)
-                             (cdr old-margin))))))
+                             (cdr old-margin)))))))
+
+(defun org-roam-tree--track-toggle (&rest _args)
+  "Save fold state for the file section after toggling."
+  (let* ((section (magit-current-section))
+      (node org-roam-current-node)
+             (file (string-remove-prefix "org-roam-tree-file-" (oref section value)))
+             (hidden (oref section hidden)))  ;; true if folded
+        (org-roam-tree--set-file-fold-state (org-roam-node-id node) file hidden)))
+
+(advice-add 'magit-section-toggle :after #'org-roam-tree--track-toggle)
 
 
 (defun org-roam-tree--prefix-node-content (is-last-list)
@@ -250,17 +289,6 @@ NODE defaults to `org-roam-node-at-point` if nil."
          (push (cons file (nreverse reflinks)) result))
        table)
       result)))
-
-(defun org-roam-tree-collapse-all-files ()
-  "Collapse all top-level file branches in the Org-roam tree buffer."
-  (interactive)
-  (when (derived-mode-p 'org-roam-mode)
-    (goto-char (point-min))
-    (condition-case nil
-        (while (< (line-number-at-pos) (line-number-at-pos (point-max)))
-          (next-line)
-          (magit-section-hide (magit-current-section)))
-      (error (message "done")))))
 
 
 (provide 'org-roam-tree)
