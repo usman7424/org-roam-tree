@@ -31,11 +31,15 @@
 ;; Show only this section in the org-roam buffer:
 ;;(setq! org-roam-mode-sections '(org-roam-tree-backlinks-section))
 ;;(setq! org-roam-mode-sections '(org-roam-tree-reflinks-section))
-;;(setq! org-roam-mode-sections '(org-roam-tree-reflinks-section org-roam-tree-backlinks-section))
 ;;
 ;; Add this section with the others in the org-roam buffer:
 ;;(add-to-list 'org-roam-mode-sections
 ;;             #'org-roam-tree-backlinks-section t)
+;;
+;; DO NOT DO THIS:
+;;(setq! org-roam-mode-sections '(org-roam-tree-reflinks-section org-roam-tree-backlinks-section))
+;;having two trees in the same roam buffer is currently broken.
+;;
 
 (require 'org-roam)
 
