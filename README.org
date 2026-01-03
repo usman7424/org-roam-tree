@@ -20,15 +20,19 @@ Eventually I hope to allow arbitrary depth trees, but for the moment it's limite
 ;; 
 ;; Show only this section in the org-roam buffer:
 (setq! org-roam-mode-sections '(org-roam-tree-backlinks-section))
+(setq! org-roam-mode-sections '(org-roam-tree-reflinks-section))
 ;;
 ;; Add this section with the others in the org-roam buffer:
 (add-to-list 'org-roam-mode-sections
              #'org-roam-tree-backlinks-section t)
 #+end_src
 
+using both =org-roam-tree-backlinks-section= and =org-roam-tree-reflinks-section= at the same time is *currently broken* (or generally, using more than one tree, if you implement your own)
+
 You can customize =org-roam-tree-collapse-after-init= to enable/disable auto-collapse after building the buffer. 
+
 * TODOs:
 
-** [ ] remember & restore collapsed states
+** [X] remember & restore collapsed states
 ** [X] remove vertical bar  on final file
 ** [X] fix wrapping next header when collapsing a note
