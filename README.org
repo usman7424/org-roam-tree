@@ -35,3 +35,4 @@ You can customize =org-roam-tree-collapse-after-init= to enable/disable auto-col
 
 ** [ ] Adjust tree insertion logic to allow arbitrary depth trees
 ** [ ] persist node fold states across emacs sessions
+** [ ] Fix displaying multiple trees in same org-roam buffer
